@@ -150,7 +150,7 @@ If no quota data is found for the user, or the JSON fetch/parsing fails, a frien
 
 ## Configuration
 
-- `JSON_FILE_PATH`: Defaults to `../../../public/dquota.json`. Point this to where your quota exporter writes the JSON snapshot.  
+- `JSON_FILE_PATH`: Defaults to `../../../public/dquota.json`. Point this to where your quota exporter writes the JSON snapshot. a script is provided that can be triggered by a cronjob.
 - `CURRENT_USER`: Derived from `current_user` if available; falls back to `OodSupport::User.new.name`. Adjust if your environment exposes the user differently.
 
 ## Troubleshooting
