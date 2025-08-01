@@ -1,0 +1,146 @@
+<%# Inject the current username using Open OnDemand context %>
+<% username = defined?(current_user) ? current_user : OodSupport::User.new.name %>
+
+<div class="widget-header">
+  <div class="widget-title">
+    <i class="fas fa-database"></i>
+    <span>Storage</span>
+  </div>
+  <button id="reloadQuota" class="widget-action" title="Refresh">
+    <i class="fa fa-rotate-right"></i>
+  </button>
+</div>
+
+<div id="quota-timestamp" class="last-updated"></div>
+
+<div id="quota-content-container">
+  <div class="quota-container"></div>
+</div>
+
+<script>
+const CURRENT_USER = "<%= username %>";
+const JSON_FILE_PATH = '../../../public/dquota.json';
+
+function formatBytes(bytes, decimals = 2) {
+  if (bytes === 0) return '0 Bytes';
+  const k = 1024;
+  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(decimals)) + ' ' + sizes[i];
+}
+
+function formatNumber(val) {
+  if (val >= 1_000_000) return (val / 1_000_000).toFixed(1) + 'M';
+  if (val >= 1_000) return (val / 1_000).toFixed(1) + 'K';
+  return val;
+}
+
+function calculatePercentage(used, limit) {
+  if (limit === 0) return 0;
+  return (used / limit * 100).toFixed(0);
+}
+
+function getBarClass(percent) {
+  if (percent >= 90) return 'red';
+  if (percent >= 70) return 'yellow';
+  return 'green';
+}
+
+function sanitizeJSON(jsonString) {
+  return jsonString
+    .replace(/,\s*(\]|\})/g, '$1')
+    .replace(/(\}|\])\s*(\{|\[)/g, '$1,$2')
+    .replace(/,\s*,/g, ',');
+}
+
+function cleanData(data) {
+  if (!data || !data.quotas || !Array.isArray(data.quotas)) return [];
+  return data.quotas.map(q => ({
+    ...q,
+    block_limit: isNaN(q.block_limit) ? 0 : q.block_limit,
+    total_block_usage: isNaN(q.total_block_usage) ? 0 : q.total_block_usage,
+    file_limit: isNaN(q.file_limit) ? 0 : q.file_limit,
+    total_file_usage: isNaN(q.total_file_usage) ? 0 : q.total_file_usage
+  }));
+}
+
+function updateQuotaTable(quotas) {
+  const userQuotas = quotas.filter(q => q.user === CURRENT_USER);
+  const container = document.querySelector('.quota-container');
+  container.innerHTML = '';
+
+  if (userQuotas.length === 0) {
+    container.innerHTML = `
+      <div class="no-data-msg">
+        No quota information found for user: <strong>${CURRENT_USER}</strong>.<br>
+        Data is updated every 5 minutes. Please try refreshing again shortly.
+      </div>`;
+    return;
+  }
+
+  userQuotas.forEach(quota => {
+    const folderName = quota.path.split(':/')[1];
+    const blockPercent = calculatePercentage(quota.total_block_usage, quota.block_limit);
+    const filePercent = calculatePercentage(quota.total_file_usage, quota.file_limit);
+
+    const entry = document.createElement('div');
+    entry.className = 'storage-entry';
+    entry.innerHTML = `
+      <div class="storage-header">
+        ${folderName.replace(/_/g, ' / ')}
+        <a class="browse-button" href="https://FQDN.edu/pun/sys/dashboard/files/fs/home/${CURRENT_USER}${folderName === 'home' ? '' : `/${folderName}`}" target="_blank" rel="noopener noreferrer">
+          Browse Files
+        </a>
+      </div>
+
+      <div class="storage-row">
+        <strong>${formatBytes(quota.total_block_usage)}</strong> / ${formatBytes(quota.block_limit)} disk space
+        <div class="bar-track">
+          <div class="bar-fill ${getBarClass(blockPercent)}" style="width: ${blockPercent}%;"></div>
+        </div>
+        <div class="usage-percent">${blockPercent}% used</div>
+      </div>
+
+      <div class="storage-row">
+        ${formatNumber(quota.total_file_usage)} / ${formatNumber(quota.file_limit)} files
+        <div class="bar-track">
+          <div class="bar-fill green" style="width: ${filePercent}%;"></div>
+        </div>
+        <div class="usage-percent">${filePercent}% used</div>
+      </div>
+    `;
+    container.appendChild(entry);
+  });
+}
+
+function updateTimestamp() {
+  const tsEl = document.getElementById("quota-timestamp");
+  if (tsEl) {
+    const now = new Date();
+    tsEl.textContent = `Last updated: ${now.toLocaleTimeString()}`;
+  }
+}
+
+async function loadQuotaData() {
+  try {
+    const response = await fetch(JSON_FILE_PATH);
+    const rawText = await response.text();
+    const data = JSON.parse(sanitizeJSON(rawText));
+    updateQuotaTable(cleanData(data));
+    updateTimestamp();
+  } catch (err) {
+    console.error('Error loading quota data:', err);
+    const container = document.querySelector('.quota-container');
+    container.innerHTML = `
+      <div class="no-data-msg">
+        Unable to load storage quota data at this time.<br>
+        The data is updated every 5 minutes. Please try refreshing again shortly.
+      </div>`;
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  loadQuotaData();
+  document.getElementById('reloadQuota')?.addEventListener('click', loadQuotaData);
+});
+</script>
