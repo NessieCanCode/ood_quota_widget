@@ -1,6 +1,7 @@
 # OnDemand Storage Quota Widget
 
 ## About
+![Quota Widget](Screenshot.png)
 
 This repository contains a lightweight, transferable OnDemand storage quota widget that consumes a published JSON snapshot (`dquota.json`), normalizes potentially messy values, and renders per-user quota usage for both block (disk) and file counts. It was built so other sites or institutions can drop it into their dashboards with minimal effort, adapt the source path, and override presentation or heuristics as needed.
 
