@@ -1,0 +1,135 @@
+/* === Quota widget minimal CSS === */
+
+/* Header / title / refresh button */
+.widget-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #222;
+  gap: 0.5rem;
+}
+.widget-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.widget-action {
+  font-size: 1rem;
+  padding: 0.2rem 0.8rem;
+  border: none;
+  background: white;
+  border-radius: 999px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Timestamp line */
+.last-updated {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: -0.5rem;
+}
+
+/* Quota container (holds individual storage entries) */
+.quota-container {
+  max-width: 900px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  margin-bottom: 10px;
+  font-family: system-ui, sans-serif;
+}
+
+/* Individual storage entry/card */
+.storage-entry {
+  background: #fff;
+  padding: 1rem 1.25rem;
+  border-radius: 6px;
+  margin-bottom: 1rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* Header within each storage entry */
+.storage-header {
+  font-weight: 600;
+  color: #222;
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Browse files button/link */
+.browse-button {
+  font-size: 0.75rem;
+  background: #f0f9ff;
+  border: 1px solid #cce5ff;
+  color: #007bff;
+  padding: 0.2rem 0.75rem;
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-block;
+}
+
+/* Usage rows (disk and file counts) */
+.storage-row {
+  font-size: 0.875rem;
+  color: #333;
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+
+/* Bar background and fill */
+.bar-track {
+  background: #eee;
+  height: 6px;
+  border-radius: 3px;
+  margin: 5px 0;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.3s ease;
+}
+
+/* Utilization colors */
+.bar-fill.green,
+.green {
+  background-color: #4caf50;
+}
+.bar-fill.yellow,
+.yellow {
+  background-color: #ffc107;
+  color: #000;
+}
+.bar-fill.red,
+.red {
+  background-color: #f44336;
+}
+
+/* Percent usage text */
+.usage-percent {
+  font-size: 0.8rem;
+  color: #666;
+  text-align: right;
+}
+
+/* Fallback / error state */
+.no-data-msg {
+  padding: 1rem;
+  background: #fff;
+  border-radius: 10px;
+  font-size: 0.95rem;
+  text-align: center;
+  color: #555;
+}
